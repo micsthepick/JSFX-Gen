@@ -1,0 +1,42 @@
+desc: background noise
+
+import cookdsp.jsfx-inc
+
+slider1:baseF=200<50, 2000, 10>Base Freq
+slider2:slowness=5000<100, 10000, 100>Slowness (ms)
+slider3:variability=1000<0,5000,1>variability
+slider4:Q=5<0.1, 30, 0.01>Q
+slider5:db=0<-120,20,1>gain
+
+@init
+bq1.biquad(baseF, 1, 2);
+newBase = baseF;
+currentF = targetF = baseF;
+counter = blockSize = slowness*srate/1000;
+
+@slider
+blockSize = slowness*srate/1000;
+gain = 10^(db/20);
+
+@sample
+newBase = newBase*(baseF/newBase)^0.001;
+counter >= blockSize ? (
+  currentF = targetF;
+  targetF = rand()*variability+newBase;
+  counter = 0;
+);
+out1 = rand()*2-1;
+zzz = currentF*(targetF/currentF)^(counter/blockSize);
+bq1.biquad_set_freq(currentF*(targetF/currentF)^(counter/blockSize));
+bq1.biquad_set_q(Q);
+counter += 1;
+out2 = bq1.biquad_do(out1) * newBase^0.5 / srate * 200;
+out2 *= gain;
+spl0 = out2;
+spl1 = out2;
+spl2 = out2;
+spl3 = out2;
+spl4 = out2;
+spl5 = out2;
+spl6 = out2;
+spl7 = out2;
